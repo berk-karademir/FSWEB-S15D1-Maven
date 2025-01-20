@@ -1,14 +1,21 @@
 package org.example.mobile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MobilePhone {
 
-    private String myNumber;
-    private List<Contact> myContacts; {
-    };
 
+    private static final Set<String> existingPhoneNumbers = new HashSet<>();
+
+    private String myNumber;
+    private List<Contact> myContacts;
+
+
+    public MobilePhone(String myNumber) {
+        this.myNumber = myNumber;
+        this.myContacts = new ArrayList<>();
+        System.out.println("Your mobile phone is ready with the number " + myNumber );
+    }
 
     public MobilePhone(String myNumber, List<Contact> myContacts) {
         this.myNumber = myNumber;
@@ -27,14 +34,30 @@ public class MobilePhone {
 
     public boolean addNewContact(Contact contact) {
         if (contact == null || contact.getName() == null || contact.getPhoneNumber() == null) {
+            System.out.println("Something gone wrong");
             return false;
         }
-        if (findContact(contact.getName()) >= 0) {
+        // Telefon numarasının daha önce eklenip eklenmediğini kontrol et
+        if (findContactByPhoneNumber(contact.getPhoneNumber()) >= 0) {
+            System.out.println("Check the " + contact.getName() + "'s phone number ("+ contact.getPhoneNumber() +"), this number is already in your contact list!");
             return false;
+        } else {
+            System.out.println(contact.getName() + " has been added to your contact list successfully with the phone number " + contact.getPhoneNumber());
+            return this.myContacts.add(contact);
         }
-        return this.myContacts.add(contact);
 
     }
+
+    // Telefon numarasını kontrol etmek için yardımcı metod
+    private int findContactByPhoneNumber(String phoneNumber) {
+        for (int i = 0; i < this.myContacts.size(); i++) {
+            if (this.myContacts.get(i).getPhoneNumber().equals(phoneNumber)) {
+                return i;
+            }
+        }
+        return -1; // Numara bulunamazsa -1 döndür
+    }
+
 
     public boolean updateContact(Contact oldContact, Contact newContact) {
         int oldContactIndex = findContact(oldContact);
@@ -72,48 +95,72 @@ public class MobilePhone {
             System.out.println(contactName + " not found in contacts.");
             return null;
         }
-        System.out.println( contactName + " found at index " + index);
-        return this.myContacts.get(index);
+
+        Contact foundContact = this.myContacts.get(index);
+        System.out.println(contactName + "'s index is " + index +
+                " and Phone number is " + foundContact.getPhoneNumber());
+        return foundContact;
     }
 
+
+
     public void printContacts() {
-        for (int i = 0; i < this.myContacts.size(); i++) {
-            Contact contact = this.myContacts.get(i);
-            System.out.println((i + 1) + ". " + contact.getName() + " -> " + contact.getPhoneNumber());
+        if (!myContacts.isEmpty()) {
+            System.out.println("My contacts:");
+            int index = 1;
+            for (Contact contact : myContacts) {
+                System.out.println(index++ + ". " + contact.getName() + " -> " + contact.getPhoneNumber());
+            }
+        } else {
+            System.out.println("You have not added any contacts yet.");
         }
+
+
     }
+
+
 
     @Override
     public String toString() {
-        return "MobilePhone{" +
-                "myNumber='" + myNumber + '\'' +
-                ", myContacts=" + myContacts +
-                '}';
+        StringBuilder contactsString = new StringBuilder();
+        for (Contact contact : myContacts) {
+            contactsString.append(contact).append("\n");
+        }
+
+        return "My phone Number is: " + myNumber + "\n" +
+                (contactsString.isEmpty() ?"You have not added any contacts yet." : "My contacts: " +  myContacts);
+
+    }
+
+    public static void br() {
+        System.out.println("-----------------------------------------------------------------------");
     }
 
     public static void main(String[] args) {
 
-        List<Contact> myContacts = new ArrayList<>();
-        MobilePhone mobilePhone = new MobilePhone("11111111", myContacts);
-        mobilePhone.addNewContact(new Contact("Ali", "12345678"));
-        System.out.println(mobilePhone);
+        MobilePhone mobilePhone = new MobilePhone("0252 500 50 50");
+        mobilePhone.printContacts();
 
+        mobilePhone.addNewContact(new Contact("Ali", "555"));
+        br();
 
-        Contact contact1 = new Contact("John", "12345");
-        Contact contact2 = new Contact("John", "12345");
+        Contact contact1 = new Contact("John", "123");
+        Contact contact2 = new Contact("John2", "123");
         Contact contact3 = new Contact("Jane", "67890");
-        System.out.println(contact1.equals(contact2)); // true
-        System.out.println(contact1.equals(contact3)); // false
-        System.out.println(contact1.equals("Not a Contact")); // false
+        Contact contact4 = new Contact("Berk", "999 999");
+        System.out.println();
+        mobilePhone.addNewContact(contact1);
+        mobilePhone.addNewContact(contact2);
+        mobilePhone.addNewContact(contact3);
+        System.out.println(contact4);
+        mobilePhone.addNewContact(contact4);
 
-
+        br();
         System.out.println(mobilePhone.queryContact("Ali"));
         System.out.println(mobilePhone.queryContact("Usman"));
+        br();
 
-        mobilePhone.addNewContact(new Contact("Cabbaar","345"));
-
-        mobilePhone.addNewContact(new Contact("Cabbaar","345"));
-        System.out.println(mobilePhone.getMyContacts());
+        mobilePhone.printContacts();
 
     }
 
